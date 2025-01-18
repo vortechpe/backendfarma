@@ -28,11 +28,17 @@ namespace Infrastructure.Repositories
         {
             return await _context.Set<User>().FirstOrDefaultAsync(u => u.Email == email);
         }
-
-        public async Task<IEnumerable<User>> GetAllAsync()
+        public IQueryable<User> GetAllAsync()
         {
-            return await _context.Set<User>().ToListAsync();
+            return _context.User.AsQueryable();  // Esto devuelve un IQueryable para poder aplicar Skip y Take
         }
+
+        public async Task<int> CountAsync()
+        {
+            return await _context.User.CountAsync();  // Contar el total de usuarios
+        }
+
+       
 
         public async Task AddAsync(User user)
         {

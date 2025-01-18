@@ -20,6 +20,18 @@ namespace WebApi.Controllers
             _mediator = mediator;
         }
 
+        [HttpGet]
+        public async Task<IActionResult> ListarUsuarios([FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10)
+        {
+            // Crear la consulta
+            var query = new ListarUsuariosQuery(pageNumber, pageSize);
+
+            // Ejecutar la consulta a través de MediatR
+            var resultado = await _mediator.Send(query);
+
+            // Devolver el resultado como respuesta HTTP
+            return Ok(resultado);
+        }
         [HttpPost]
         public async Task<IActionResult> Create([FromBody] CreateUserCommand command)
         {

@@ -11,7 +11,10 @@ namespace Application.Interfaces
     {
         Task<User> GetByIdAsync(Guid userId);
         Task<User> GetByEmailAsync(string email);
-        Task<IEnumerable<User>> GetAllAsync();
+        IQueryable<User> GetAllAsync();
+
+        // Método para contar el número total de usuarios
+        Task<int> CountAsync();
         Task AddAsync(User user);
         Task UpdateAsync(User user);
         Task DeleteAsync(Guid userId);
