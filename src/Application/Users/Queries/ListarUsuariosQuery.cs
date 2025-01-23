@@ -13,11 +13,12 @@ namespace Application.Users.Queries
     {
         public int PageNumber { get; set; }
         public int PageSize { get; set; }
-
-        public ListarUsuariosQuery(int pageNumber, int pageSize)
+        public string QueryFilter { get; set; } 
+        public ListarUsuariosQuery(int pageNumber, int pageSize, string queryFilter)
         {
             PageNumber = pageNumber;
             PageSize = pageSize;
+            QueryFilter = queryFilter;
         }
     }
 }

@@ -16,7 +16,8 @@ namespace Domain.Entities
         // Propiedades relacionadas con autenticación
         public string UserName { get; set; }
         public string PasswordHash { get; set; } // Contraseña encriptada
-        public string PasswordSalt { get; set; } // Salt para la encriptación
+        public string Key { get; set; } // Salt para la encriptación
+        public string Iv { get; set; } // Salt para la encriptación
 
         // Propiedades de auditoría
         public DateTime FechaCreacion { get; private set; }

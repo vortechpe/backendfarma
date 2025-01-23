@@ -1,5 +1,6 @@
 ﻿using Application.Interfaces;
 using Application.Users.Commands;
+using Domain.Exceptions;
 using MediatR;
 using System;
 using System.Collections.Generic;
@@ -12,19 +13,19 @@ namespace Application.Users.Handlers
     public class UpdateUserCommandHandler : IRequestHandler<UpdateUserCommand>
     {
         private readonly IUserRepository _userRepository;
-        private readonly IPasswordHasher _passwordHasher;
+        private readonly ISecurityService _securityService;
 
-        public UpdateUserCommandHandler(IUserRepository userRepository, IPasswordHasher passwordHasher)
+        public UpdateUserCommandHandler(IUserRepository userRepository, ISecurityService securityService)
         {
             _userRepository = userRepository;
-            _passwordHasher = passwordHasher;
+            _securityService = securityService;
         }
 
         public async Task Handle(UpdateUserCommand request, CancellationToken cancellationToken)
         {
             var user = await _userRepository.GetByIdAsync(request.Id);
             if (user == null)
-                throw new Exception("Usuario no encontrado.");
+                throw new CustomException("Usuario no encontrado.");
 
             user.Nombre = request.Nombre ?? user.Nombre;
             user.Telefono = request.Telefono ?? user.Telefono;
@@ -32,9 +33,8 @@ namespace Application.Users.Handlers
             if (!string.IsNullOrEmpty(request.Password))
             {
                 // Hashear la nueva contraseña con el salt
-                var (passwordHash, passwordSalt) = _passwordHasher.HashPassword(request.Password);
-                user.PasswordHash = passwordHash;
-                user.PasswordSalt = passwordSalt;
+                var encryptedPasswordResult = _securityService.Encrypt(user.UserName, request.Password);
+                user.PasswordHash = encryptedPasswordResult.EncryptedText;
             }
             user.FechaActualizacion = DateTime.UtcNow;
             user.UsuarioActualizador = request.UsuarioActualizador;

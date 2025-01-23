@@ -21,14 +21,15 @@ namespace Application.Users.Handlers
         }
         public async Task<PagedResult<UsuarioDto>> Handle(ListarUsuariosQuery request, CancellationToken cancellationToken)
         {
-            var totalUsuarios =  await _usuarioRepository.CountAsync();
-
-            // Obtener los usuarios con paginación
             var usuarios =  _usuarioRepository
-                .GetAllAsync()  // Este método debe devolver IQueryable<Usuario>
+                .GetAllAsync(request.QueryFilter)  // Pasamos el único parámetro de búsqueda
                 .Skip((request.PageNumber - 1) * request.PageSize)
                 .Take(request.PageSize)
-                .ToList();  // Aquí se utiliza ToListAsync para convertir la consulta en una lista
+                .ToList();  // Convierte la consulta en una lista
+
+            // Contar el total de usuarios con el filtro aplicado
+            var totalUsuarios = await _usuarioRepository
+                .CountAsync(request.QueryFilter);
 
             // Convertir a DTO
             var usuariosDto = usuarios.Select(usuario => new UsuarioDto
@@ -36,6 +37,10 @@ namespace Application.Users.Handlers
                 Id = usuario.Id,
                 Nombre = usuario.Nombre,
                 Email = usuario.Email,
+                UserName = usuario.UserName,
+                Telefono = usuario.Telefono,
+                StateUser = usuario.StateUser,
+
                 // Otros campos que necesites
             }).ToList();
 

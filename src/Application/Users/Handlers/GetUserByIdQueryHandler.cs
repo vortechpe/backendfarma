@@ -32,7 +32,8 @@ namespace Application.Users.Handlers
                 Email = user.Email,
                 Telefono = user.Telefono,
                 UserName = user.UserName,
-                FechaCreacion = user.FechaCreacion
+                FechaCreacion = user.FechaCreacion,
+                Password = user.PasswordHash
             };
         }
     }

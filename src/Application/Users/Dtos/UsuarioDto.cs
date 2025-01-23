@@ -11,6 +11,10 @@ namespace Application.Users.Dtos
         public Guid Id { get; set; }
         public string Nombre { get; set; }
         public string Email { get; set; }
+        public string UserName { get; set; }
+        public string Telefono { get; set; }
+        public bool StateUser { get; set; }
+
         // Otros campos que necesites
     }
 }

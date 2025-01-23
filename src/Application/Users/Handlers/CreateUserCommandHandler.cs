@@ -2,6 +2,7 @@
 using Application.Users.Commands;
 using Application.Users.Responses;
 using Domain.Entities;
+using Domain.Exceptions;
 using MediatR;
 using System;
 using System.Collections.Generic;
@@ -14,20 +15,21 @@ namespace Application.Users.Handlers
     public class CreateUserCommandHandler : IRequestHandler<CreateUserCommand, CreateUserResponse>
     {
         private readonly IUserRepository _userRepository;
-        private readonly IPasswordHasher _passwordHasher;
+        private readonly ISecurityService _securityService;
 
-        public CreateUserCommandHandler(IUserRepository userRepository, IPasswordHasher passwordHasher)
+        public CreateUserCommandHandler(IUserRepository userRepository, ISecurityService securityService)
         {
             _userRepository = userRepository;
-            _passwordHasher = passwordHasher;
+            _securityService = securityService;
         }
 
         public async Task<CreateUserResponse> Handle(CreateUserCommand request, CancellationToken cancellationToken)
         {
+          
             // Verificar si el correo ya existe
             var existingUser = await _userRepository.GetByEmailAsync(request.Email);
             if (existingUser != null)
-                throw new Exception("El usuario con este correo ya existe.");
+                throw new CustomException("El usuario con este correo ya existe.");
 
             // Crear un nuevo usuario
             var user = new User
@@ -40,9 +42,12 @@ namespace Application.Users.Handlers
             };
 
             // Hashear la contraseña antes de guardarla
-            var (passwordHash, passwordSalt) = _passwordHasher.HashPassword(request.Password);
-            user.PasswordHash = passwordHash;
-            user.PasswordSalt = passwordSalt;
+            var encryptedPasswordResult = _securityService.Encrypt(user.UserName, request.Password);
+
+            // Asignar la contraseña encriptada al usuario
+            user.PasswordHash = encryptedPasswordResult.EncryptedText;
+            user.Key = encryptedPasswordResult.Key;
+            user.Iv = encryptedPasswordResult.IV;
 
             // Guardar el usuario en la base de datos
             await _userRepository.AddAsync(user);

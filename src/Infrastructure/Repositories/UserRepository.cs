@@ -1,5 +1,6 @@
 ﻿using Application.Interfaces;
 using Domain.Entities;
+using Domain.Exceptions;
 using Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 using System;
@@ -28,22 +29,46 @@ namespace Infrastructure.Repositories
         {
             return await _context.Set<User>().FirstOrDefaultAsync(u => u.Email == email);
         }
-        public IQueryable<User> GetAllAsync()
+        public IQueryable<Usuario> GetAllAsync(string filtro)
         {
-            return _context.User.AsQueryable();  // Esto devuelve un IQueryable para poder aplicar Skip y Take
+            var query = _context.Usuarios.AsQueryable();
+
+            if (!string.IsNullOrEmpty(filtro))
+            {
+                // Aplicamos el filtro por nombre o correo
+                query = query.Where(u => u.NombreUsuario.Contains(filtro));
+            }
+
+            return query;
         }
 
-        public async Task<int> CountAsync()
+        public async Task<int> CountAsync(string filtro = null)
         {
-            return await _context.User.CountAsync();  // Contar el total de usuarios
+            var query = _context.User.AsQueryable();
+
+            if (!string.IsNullOrEmpty(filtro))
+            {
+                query = query.Where(u => u.Nombre.Contains(filtro) || u.Email.Contains(filtro) || u.UserName.Contains(filtro));
+            }
+
+            return await query.CountAsync();  // Retornamos el total de usuarios que coinciden con el filtro
         }
 
-       
+
 
         public async Task AddAsync(User user)
         {
-            await _context.Set<User>().AddAsync(user);
-            await _context.SaveChangesAsync();
+            try
+            {
+                await _context.Set<User>().AddAsync(user);
+                await _context.SaveChangesAsync();
+            }
+            catch (CustomException e)
+            {
+                throw new CustomException(e.Message);
+                throw;
+            }
+            
         }
 
         public async Task UpdateAsync(User user)

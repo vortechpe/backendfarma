@@ -7,16 +7,16 @@ using System.Threading.Tasks;
 
 namespace Application.Interfaces
 {
-    public interface IUserRepository
+    public interface IPersonaRepository
     {
-        Task<User> GetByIdAsync(Guid userId);
-        Task<User> GetByEmailAsync(string email);
-        IQueryable<User> GetAllAsync(string filtro);
+        Task<Persona> GetByIdAsync(Guid userId);
+        Task<Persona> GetByEmailAsync(string email);
+        IQueryable<Persona> GetAllAsync(string filtro);
 
         // Método para contar el número total de usuarios
         Task<int> CountAsync(string filtro);
-        Task AddAsync(User user);
-        Task UpdateAsync(User user);
+        Task AddAsync(Persona user);
+        Task UpdateAsync(Persona user);
         Task DeleteAsync(Guid userId);
     }
 }

@@ -18,18 +18,18 @@ namespace Application.Auth.Handlers
     public class LoginCommandHandler : IRequestHandler<LoginCommand, LoginResponse>
     {
         private readonly IUserRepository _userRepository;
-        private readonly IPasswordHasher _passwordHasher;
+        private readonly ISecurityService _securityService;
         private readonly IConfiguration _configuration;
-        public LoginCommandHandler(IUserRepository userRepository, IPasswordHasher passwordHasher, IConfiguration configuration)
+        public LoginCommandHandler(IUserRepository userRepository, ISecurityService securityService, IConfiguration configuration)
         {
             _userRepository = userRepository;
-            _passwordHasher = passwordHasher;
+            _securityService = securityService;
             _configuration = configuration;
         }
         public async Task<LoginResponse> Handle(LoginCommand request, CancellationToken cancellationToken)
         {
             var user = await _userRepository.GetByEmailAsync(request.Email);
-            if (user == null || !_passwordHasher.VerifyPassword(request.Password, user.PasswordHash, user.PasswordSalt))
+            if (user == null || !_securityService.VerifyPassword(request.Password, user.PasswordHash, user.Key, user.Iv))
                 throw new UnauthorizedAccessException("Credenciales incorrectas.");
 
             // Generar JWT

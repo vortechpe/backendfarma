@@ -1,5 +1,6 @@
 ﻿using Application.Interfaces;
 using Application.Users.Commands;
+using Domain.Exceptions;
 using MediatR;
 using System;
 using System.Collections.Generic;
@@ -21,11 +22,11 @@ namespace Application.Users.Handlers
         public async Task Handle(DeleteUserCommand request, CancellationToken cancellationToken)
         {
             var user = await _userRepository.GetByIdAsync(request.Id);
-            user.StateUser = user.StateUser != true ? user.StateUser : false;
+            user.StateUser = user.StateUser != true ? true : false;
             user.FechaActualizacion = DateTime.UtcNow;
             user.UsuarioActualizador = request.UsuarioActualizador;
             if (user == null)
-                throw new Exception("Usuario no encontrado.");
+                throw new CustomException("Usuario no encontrado.");
 
             // Eliminar el usuario
             await _userRepository.UpdateAsync(user);
